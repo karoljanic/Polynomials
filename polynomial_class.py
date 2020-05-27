@@ -12,6 +12,9 @@ class Polynomial:
         self.name = new_name
 
     def get_degree_of_polynomial(self):
+        while self.coeffs[0] == 0 and len(self.coeffs)!= 1:
+            del self.coeffs[0]
+
         return  len(self.coeffs)-1
 
     def get_monomials(self):
@@ -23,7 +26,7 @@ class Polynomial:
         for i in range(len(p)):
             if p[i] == 0 and False:
                 mono.append(str(0))
-            elif str(p[i])[0] == "0" or (str(p[i])[0] == "-" and str(p[i])[1] == "0"):
+            elif (str(p[i])[0] == "0" or (str(p[i])[0] == "-" and str(p[i])[1] == "0")) and not '.' in list(str(p[i])):
                 pass
             elif i == 0:
                 mono.append(str(p[i]))
@@ -36,7 +39,7 @@ class Polynomial:
                     mono.append(str(p[i]) + variable)
             else:
                 if p[i] == 1:
-                    mono.append( variable + "^" + str(i))
+                    mono.append(variable + "^" + str(i))
                 elif p[i] == -1:
                     mono.append("-" + variable + "^" + str(i))
                 else:
@@ -117,6 +120,8 @@ class Polynomial:
         return Polynomial("Subtracted(" + self.name[-2] + ")", list(reversed(c)))
 
     def __mul__(self, other):
+        while self.coeffs[0] == 0 and len(self.coeffs)!= 1:
+            del self.coeffs[0]
         p = []
         n = self.get_degree_of_polynomial()+other.get_degree_of_polynomial()
         for i in range(n+1):
@@ -125,8 +130,6 @@ class Polynomial:
             for j in range(len(other.coeffs)):
                 p[i+j] += self.coeffs[i]*other.coeffs[j]
         return Polynomial("Multiplied("+self.name[-2]+")", p)
-
-
 
     def get_value(self, argument):
         result = self.coeffs[0]
@@ -147,12 +150,18 @@ class Polynomial:
         return (minus_d,d)
 
     def find_integer_roots(self):
+        while self.coeffs[0] == 0 and len(self.coeffs)!= 1:
+            del self.coeffs[0]
         r = set()
+        if not isinstance(self.coeffs[-1],int):
+            if len(r) == 0:
+                r.add('-')
+            return r
         if len(self.coeffs) == 1:
             if self.coeffs[0] == 0:
-                return "all real number"
+                r.add('R')
             else:
-                return "none"
+                r.add('-')
         elif self.coeffs[-1] == 0:
             c = self.coeffs
             r.add(0)
@@ -161,12 +170,23 @@ class Polynomial:
         else:
             c = self.coeffs
 
-        d = self.divisors(c[-1])
+            d = self.divisors(c[-1])
 
-        for i in range(len(d[0])):
-            if self.get_value(d[0][i]) == 0:
-                r.add(d[0][i])
-            if self.get_value(d[1][i]) == 0:
-                r.add(d[1][i])
+            for i in range(len(d[0])):
+                if self.get_value(d[0][i]) == 0:
+                    r.add(d[0][i])
+                if self.get_value(d[1][i]) == 0:
+                    r.add(d[1][i])
 
         return r
+
+    
+
+    def __truediv__(self, other):       # Poly1 / Poly2
+        print("div")
+
+    def __floordiv__(self, other):      # Poly1 // Poly2
+        print("flordiv")
+
+    def __divmod__(self, other):        # Poly1 % Poly2
+        print("divmod")

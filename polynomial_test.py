@@ -37,8 +37,17 @@ print("Roots E(x):",(wielomian9.find_integer_roots()))
 wielomian8 = p.Polynomial("D(x)", [3,-14,-57,56])
 wielomian9 = p.Polynomial("E(x)", [3,-14,3,2])
 
-wynik = wielomian8*wielomian9
-wynik.display()
+wielomian10 = p.Polynomial("F(x)",[0.7,6/5,9.76])
+wielomian10.display()
+print(wielomian10.find_integer_roots())
+
+wielomian11 = p.Polynomial("G(x)", [0.7,6/5,9.76])
+wielomian11.display()
+print(wielomian11.find_integer_roots())
+
+
+
+
 
 
 
