@@ -1,108 +1,174 @@
 import fraction_class as f
 
+def nwd(a,b):       # the greatest common divisor
+    while b:
+        a, b = b, a % b
+    return a
+
+def nww(a,b):       # the least common multiple
+    return a*b//nwd(a,b)
+
+
 class Root:
-    def __init__(self,coefficient,degree,number):
-        self.coefficient = coefficient
-        self.degree = degree
-        self.number = number
+    def __init__(self, coefficient, degree = 1, number = 1):
 
-    def __repr__(self):
-        if self.degree == 1 and self.number == 1:
-            return ("{}".format(self.coefficient))
+        if isinstance(coefficient, int):           # coefficient can be Fraction or integer
+            self.coefficient = f.Fraction(coefficient)
+        elif isinstance(coefficient, f.Fraction):
+            self.coefficient = coefficient
         else:
-            return ("{}*({}^(1/{}))".format(self.coefficient,int(self.number),int(self.degree)))
+            raise TypeError
 
-    def simplify(self):
-        d = []
+        if isinstance(degree, int):
+            self.degree = degree                   # degree must be positive integer
+        else:
+            raise TypeError
+
+        if isinstance(number, int):                # number must be positive integer
+            self.number = number
+        else:
+            raise TypeError
+
+        self.simplify()
+
+    def __repr__(self):     # printing style
+        self.simplify()
+        if self.coefficient.numerator == 0:
+            return "0"
+        if self.degree == 1 and self.number == 1 and self.coefficient != 1:
+            return ("{}".format(self.coefficient))
+        elif self.degree == 1 and self.number == 1 and self.coefficient == 1:
+            return "1"
+        elif self.coefficient != 1:
+            return ("{}*({}^(1/{}))".format(self.coefficient,int(self.number),int(self.degree)))
+        else:
+            return ("{}^(1/{})".format(int(self.number), int(self.degree)))
+
+    def __add__(self, other):   # addition: +
+        self.simplify()
+        other.simplify()
+
+        if self.degree == other.degree and self.number == other.number:
+            return [Root(self.coefficient+other.coefficient, int(self.degree), int(self.number))]
+        else:
+            return [self,other]
+
+    def __sub__(self, other):    # substraction: -
+        self.simplify()
+        other.simplify()
+
+        if self.degree == other.degree and self.number == other.number:
+            return [Root(self.coefficient - other.coefficient, int(self.degree), int(self.number))]
+        else:
+            return [self, Root(-other.coefficient, int(other.degree), int(other.number))]
+
+    def __mul__(self, other):   # multiplication: *
+        self.simplify()
+        other.simplify()
+
+        coeff = self.coefficient*other.coefficient
+        degree = self.degree*other.degree
+        num = self.number**other.degree * other.number**self.degree
+        r = Root(coeff, int(degree), int(num))
+        r.simplify()
+        return r
+
+    def __truediv__(self, other):   # real number division: /
+        self.simplify()
+        other.simplify()
+
+        coeff = self.coefficient / other.coefficient
+        deg = nww(self.degree, other.degree)
+
+        a = pow(self.number, deg//self.degree)
+        b = pow(other.number, deg//other.degree)
+        c = b
+
+        coeff = coeff / f.Fraction(b)
+        d = a * (c ** (deg-1))
+
+        return Root(coeff, int(deg), int(d))
+
+
+    def __floordiv__(self, other):      # integers division: //
+        pass                            # operation unavailable
+
+    def __mod__(self, other):           # modulo: %
+        pass                            # operation unavailable
+
+    def __pow__(self, power, modulo=None):      # exponentiation: **
+        if not modulo == None:                  # exponentiation with modulo unavailable
+            pass
+        else:
+            x = Root(1)
+            for i in range(power):
+                x = x*self
+                x.simplify()
+
+            return x
+
+
+    def __neg__(self):      # opposite number: -
+        return Root(-self.coefficient, self.degree, self.number)
+
+    def simplify(self):    # simplifying number
+        dividers = []
         i = 2
-        y = self.number
-        while y != 1:
-            if y%i == 0:
-                d.append(i)
-                y /= i
+        num = self.number
+        while num != 1:
+            if num%i == 0:
+                dividers.append(i)
+                num /= i
             else:
                 i += 1
-        for i in d:
-            if d.count(i) >= self.degree:
-                for j in range(self.degree):
-                    d.remove(i)
-                self.number/=i**self.degree
-                self.coefficient *= i
+        if len(dividers) > 0:
+            unique_dividers = list(set(dividers))
+            counts = []
 
-        for i in d:
-            if self.degree % (d.count(i)) == 0 and d.count(i) != 1:
-                self.degree/= d.count(i)
-                self.degree = int(self.degree)
-                self.number = i
-                for j in range(d.count(i)-1):
-                    d.remove(i)
+            for i in unique_dividers:
+                counts.append(dividers.count(i))
+
+            for i in range(len(counts)):
+                if counts[i] >= self.degree:
+                    n = self.degree
+                    a = counts[i] // self.degree
+                    self.coefficient = self.coefficient * (unique_dividers[i]**a)
+                    self.number /= (unique_dividers[i]**(n*a))
 
         if self.number == 1:
             self.degree = 1
 
+        dividers = []
+        i = 2
+        num = self.number
+        while num != 1:
+            if num % i == 0:
+                dividers.append(i)
+                num /= i
+            else:
+                i += 1
+        if len(dividers) > 0:
+            unique_dividers = list(set(dividers))
+            counts = []
+            for i in unique_dividers:
+                counts.append(dividers.count(i))
+            p = counts[0]
 
-    def decimal(self, decimalplaces = 2):       # max decimalplaces = 15
-        return round(self.coefficient * self.number**(1/self.degree),decimalplaces)
+            for i in counts:
+                p = nwd(p,i)
+            if self.degree % p == 0:
+                self.degree //= p
+                self.number = pow(self.number, (1/p))
+
+        self.coefficient.simplify()
 
 
-class Roots:
-    def __init__(self, roots):
-        self.roots = roots
-
-    def __repr__(self):
-        pass
-
-    def __add__(self, other):
-        self.simplify()
-        other.simplify()
-
-        result = Roots(self.roots + other.roots)
-        result.simplify()
-
-        return result
-
-    def __sub__(self, other):
-        self.simplify()
-        other.simplify()
-
-        for x in other.roots:
-            x.coefficient *= -1
-
-        result = Roots(self.roots + other.roots)
-        result.simplify()
-
-        return result
-
-    def __mul__(self, other):
-        pass
-
-    def __truediv__(self, other):
-        pass
-
-    def __pow__(self, power, modulo=None):
-        pass
-
-    def simplify(self):
-        for x in self.roots:
-            x.simplify()
-        n = len(self.roots)
-        for k in range(n):
-            for i in range(n):
-                for j in range(i+1,n):
-                    try:
-                        if self.roots[i].number == self.roots[j].number and self.roots[i].degree == self.roots[j].degree:
-                            self.roots[i].coefficient += self.roots[j].coefficient
-                            del self.roots[j]
-                    except:
-                        pass
+    def decimal(self, decimalplaces = 2):       # max decimalplaces = 15; return approximate value of the expression
+        result = self.coefficient.decimal()*pow(self.number, (1/self.degree))
+        return round(result,decimalplaces)
 
 
 
-    def decimal(self, decimalplaces=2):  # max decimalplaces = 15
-        return round(self.coefficient * self.number ** (1 / self.degree), decimalplaces)
 
-    def display(self):
-        for x in self.roots:
-            print(x, sep = " ", end = "   ")
-        print("")
+
 
