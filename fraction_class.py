@@ -35,7 +35,7 @@ class Fraction:
         return result
 
     def __mul__(self, other):   # multiplication: *
-        result = Fraction(self.numerator * other.numerator, self.denominator * other.denominator)
+        result = Fraction(int(self.numerator) * int(other.numerator), int(self.denominator * other.denominator))
         result.simplify()
         return result
 
@@ -69,8 +69,10 @@ class Fraction:
         self.numerator /= a
         self.denominator /= a
 
-    def inverse(self):      # inverse of the fraction
+    def __invert__(self):      # inverse of the fraction
         self.numerator, self.denominator = self.denominator, self.numerator
 
     def decimal(self, decimalplaces = 2):       # max decimalplaces = 15; return approximate value of the expression
         return round(self.numerator * 1.0 / self.denominator, decimalplaces)
+
+

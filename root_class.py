@@ -35,14 +35,19 @@ class Root:
         self.simplify()
         if self.coefficient.numerator == 0:
             return "0"
-        if self.degree == 1 and self.number == 1 and self.coefficient != 1:
-            return ("{}".format(self.coefficient))
-        elif self.degree == 1 and self.number == 1 and self.coefficient == 1:
+        if self.degree == 1 and self.number == 1 and self.coefficient.decimal() == -1:
+            return "-1"
+        if self.degree == 1 and self.number == 1 and self.coefficient.decimal() == 1:
             return "1"
-        elif self.coefficient != 1:
-            return ("{}*({}^(1/{}))".format(self.coefficient,int(self.number),int(self.degree)))
-        else:
+        if self.degree == 1 and self.number == 1:
+            return ("{}".format(self.coefficient))
+        if self.coefficient.decimal() == 1:
             return ("{}^(1/{})".format(int(self.number), int(self.degree)))
+        if self.coefficient.decimal() == -1:
+            return ("-{}^(1/{})".format(int(self.number), int(self.degree)))
+        else:
+            return ("{}*({}^(1/{}))".format(self.coefficient,int(self.number),int(self.degree)))
+
 
     def __add__(self, other):   # addition: +
         self.simplify()
