@@ -2,11 +2,15 @@ class Fraction:
     def __init__(self, numerator, denominator = 1):
         if isinstance(numerator, int):      # numerator must be integer
             self.numerator = numerator
+        elif isinstance(numerator, float):
+            self.numerator = int(numerator)
         else:
             raise TypeError
 
         if isinstance(denominator, int):    # denominator must be integer
             self.denominator = denominator
+        elif isinstance(denominator, float):
+            self.denominator = int(denominator)
         else:
             raise TypeError
 

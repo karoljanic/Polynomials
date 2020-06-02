@@ -112,9 +112,8 @@ class Root:
 
             return x
 
-
     def __neg__(self):      # opposite number: -
-        return Root(-self.coefficient, self.degree, self.number)
+        return Root(-self.coefficient, int(self.degree), int(self.number))
 
     def simplify(self):    # simplifying number
         dividers = []
@@ -169,7 +168,7 @@ class Root:
 
 
     def decimal(self, decimalplaces = 2):       # max decimalplaces = 15; return approximate value of the expression
-        result = self.coefficient.decimal()*pow(self.number, (1/self.degree))
+        result = self.coefficient.decimal(15)*pow(self.number, (1/self.degree))
         return round(result,decimalplaces)
 
 
