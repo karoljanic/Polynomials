@@ -1,84 +1,88 @@
-class Polynomial:
-    def __init__(self, name, coefficents):
-        self.coeffs = coefficents
-        while self.coeffs[0] == 0 and len(self.coeffs) != 1:
-            del self.coeffs[0]
-        self.name = name
+import number_class as number
 
-    def get_name(self):
-        return self.name
+class Polynomial:
+    # coefficients must be given in the same way as numbers from 'number_class.py' in a one list
+    # the name of the polynomial must contain its name and the variable in round brackets, e.g.: "P(x)", "Poly(a)"
+    def __init__(self, name, coefficents):
+        self.name = name
+        self.coeffs = []
+        for x in coefficents:
+            self.coeffs.append(number.Number(x))
+        self.simplify()
+
+    def __repr__(self):
+        self.simplify()
+        val = 0
+        for x in self.coeffs:
+            val += x.decimal(15)
+        if val == 0:
+            return self.name+" = 0"
+        variable = self.name[-2]
+        n = len(self.coeffs)-1
+
+        result = self.name + " ="
+        for i in range(len(self.coeffs)):
+            if i == 0 or self.coeffs[i].decimal(15) < 0:
+                result += str(self.coeffs[i])
+                if n > 0:
+                    result += variable
+                if n > 1:
+                    result += "^"+str(n)
+            elif self.coeffs[i].decimal(15) != 0 :
+                result += " +"
+                result += str(self.coeffs[i])
+                if n > 0:
+                    result += variable
+                if n > 1:
+                    result += "^"+str(n)
+            n -= 1
+
+        newresult = ""
+        for i in range(result.find("=")+2, len(result)):
+            if result[i] == "1":
+                if i+1 <len(result):
+                    if result[i+1] == variable:
+                        pass
+                    else:
+                        newresult += result[i]
+                else:
+                    newresult += result[i]
+            else:
+                newresult += result[i]
+
+        return self.name+" = "+newresult
 
     def change_name(self, new_name):
         self.name = new_name
 
     def get_degree_of_polynomial(self):
-        while self.coeffs[0] == 0 and len(self.coeffs)!= 1:
-            del self.coeffs[0]
+        self.simplify()
 
-        return  len(self.coeffs)-1
+        return len(self.coeffs)-1
 
     def get_monomials(self):
-        p = list(reversed(self.coeffs))
-        mono = []
-        variable = self.name[-2]
-        if self.coeffs == [0]:
-            return [0]
-        for i in range(len(p)):
-            if p[i] == 0 and False:
-                mono.append(str(0))
-            elif (str(p[i])[0] == "0" or (str(p[i])[0] == "-" and str(p[i])[1] == "0")) and not '.' in list(str(p[i])):
-                pass
-            elif i == 0:
-                mono.append(str(p[i]))
-            elif i == 1:
-                if p[i] == 1:
-                    mono.append("-")
-                elif p[i] == -1:
-                    mono.append("-" + variable)
-                else:
-                    mono.append(str(p[i]) + variable)
-            else:
-                if p[i] == 1:
-                    mono.append(variable + "^" + str(i))
-                elif p[i] == -1:
-                    mono.append("-" + variable + "^" + str(i))
-                else:
-                    mono.append(str(p[i])+variable+"^"+str(i))
-        return list(reversed(mono))
+        self.simplify()
+        return self.coeffs
 
-    def display(self):
-        print(self.name, "=", self.get_monomials()[0], "", sep=" ", end="")
-        t = 0
-        for x in self.get_monomials():
-            if x == "0":
-                t += 1
-        if t == len(self.get_monomials()):
-            pass
-        else:
-            for i in range(1, len(self.get_monomials())):
-                if list(self.get_monomials()[i])[0] == "-":
-                    print(self.get_monomials()[i], end="")
-                else:
-                    print("+",self.get_monomials()[i],sep="", end="")
-                print(" ", end="")
-        print("")
+    def simplify(self):
+        val = 0
+        for x in self.coeffs:
+            val += x.decimal(15)
+        if val == 0:
+            self.coeffs = [number.Number("0")]
+
+        while self.coeffs[0].decimal(15) == 0 and len(self.coeffs)!= 1:
+            self.coeffs.remove(self.coeffs[0])
 
     def __eq__(self, other):
-
-        while self.coeffs[0] == 0 and len(self.coeffs)!= 1:
-            del self.coeffs[0]
-
-        while other.coeffs[0] == 0 and len(other.coeffs)!= 1:
-            del other.coeffs[0]
+        self.simplify()
+        other.simplify()
 
         return self.coeffs == other.coeffs
 
     def __ne__(self, other):
-        while self.coeffs[0] == 0 and len(self.coeffs)!= 1:
-            del self.coeffs[0]
-
-        while other.coeffs[0] == 0 and len(other.coeffs)!= 1:
-            del other.coeffs[0]
+        self.simplify()
+        other.simplify()
 
         return self.coeffs != other.coeffs
 

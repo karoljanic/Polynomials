@@ -67,7 +67,7 @@ class Number:
                 b = k[k.find("/")+1:]
                 self.expressions.append(root.Root(fraction.Fraction(int(a), int(b))*fraction.Fraction(val)))
             elif re.match("^-?[0-9]+$", k):
-                self.expressions.append(root.Root(int(k)))
+                self.expressions.append(root.Root(int(k)*int(val)))
             elif k == "":
                 self.expressions.append(root.Root(0))
             else:
