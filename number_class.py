@@ -165,6 +165,14 @@ class Number:
         else:
             return False
 
+    def __neg__(self):
+
+        result = Number("")
+        for x in self.expressions:
+            result.expressions.append(-x)
+
+        return result
+
 
     def decimal(self, decimalplaces = 2):
         result = 0

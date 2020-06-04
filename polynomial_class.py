@@ -14,7 +14,8 @@ class Polynomial:
         self.simplify()
         val = 0
         for x in self.coeffs:
-            val += x.decimal(15)
+            if x.decimal(15) != 0:
+                val +=1
         if val == 0:
             return self.name+" = 0"
         variable = self.name[-2]
@@ -67,7 +68,8 @@ class Polynomial:
     def simplify(self):
         val = 0
         for x in self.coeffs:
-            val += x.decimal(15)
+            if x.decimal(15) != 0:
+                val += 1
         if val == 0:
             self.coeffs = [number.Number("0")]
 
@@ -87,10 +89,12 @@ class Polynomial:
         return self.coeffs != other.coeffs
 
     def __add__(self, other):
+        self.simplify()
+        other.simplify()
         a = list(reversed(self.coeffs))
         b = list(reversed(other.coeffs))
         if len(b) > len(a):
-            a,b = b,a
+            a, b = b, a
         c = []
         for i in range(len(a)):
             if i < len(b):
@@ -98,9 +102,15 @@ class Polynomial:
             else:
                 c.append(a[i])
 
-        return Polynomial("Added("+self.name[-2]+")",list(reversed(c)))
+        result = Polynomial("Added("+self.name[-2]+")",[])
+        result.coeffs = list(reversed(c))
+
+        return result
+
 
     def __sub__(self, other):
+        self.simplify()
+        other.simplify()
         a = list(reversed(self.coeffs))
         b = list(reversed(other.coeffs))
         c = []
@@ -121,19 +131,25 @@ class Polynomial:
                 else:
                     c.append(a[i]-b[i])
 
-        return Polynomial("Subtracted(" + self.name[-2] + ")", list(reversed(c)))
+        result = Polynomial("Subtracted(" + self.name[-2] + ")", [])
+        result.coeffs = list(reversed(c))
+
+        return result
 
     def __mul__(self, other):
-        while self.coeffs[0] == 0 and len(self.coeffs)!= 1:
-            del self.coeffs[0]
+        self.simplify()
+        other.simplify()
         p = []
         n = self.get_degree_of_polynomial()+other.get_degree_of_polynomial()
         for i in range(n+1):
-            p.append(0)
+            p.append(number.Number("0"))
         for i in range(len(self.coeffs)):
             for j in range(len(other.coeffs)):
                 p[i+j] += self.coeffs[i]*other.coeffs[j]
-        return Polynomial("Multiplied("+self.name[-2]+")", p)
+        result = Polynomial("Multiplied("+self.name[-2]+")", [""])
+        result.coeffs = p
+
+        return result
 
     def get_value(self, argument):
         result = self.coeffs[0]
