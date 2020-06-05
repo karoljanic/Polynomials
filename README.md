@@ -1,6 +1,6 @@
 # Polynomials
 
-# Class for operations on polynomials: 
+Class for operations on polynomials: 
 *addition, 
 *subtraction, 
 *multiplication, 
@@ -9,4 +9,5 @@
 *determining values of polynomial for a given variable,
 *solving 2nd and 3rd degree equations: delta's metod and Viete's metod.
 
-# Saving actions and their results to a Latex file without rounding the non-replaceable numbers
+Displaying results and solutions step by step like on a school green board(Turtle)
+
