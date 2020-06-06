@@ -181,3 +181,4 @@ class Number:
 
         return round(result, decimalplaces)
 
+

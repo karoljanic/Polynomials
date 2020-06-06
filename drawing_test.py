@@ -1,18 +1,11 @@
-import drawing_class as draw
+import drawing_class as d
+import number_class as number
 
-drawing = draw.Drawing()
+drawing = d.Drawing()
+drawing.scale = 4
 
-drawing.draw_test_frame()
-drawing.draw_0()
+num = number.Number( "34", "2^(1/3)")
+drawing.draw_number(num)
 
-drawing.draw_test_frame()
-drawing.draw_root_symbol(2)
 
-drawing.draw_test_frame()
-drawing.draw_3()
-
-drawing.draw_test_frame()
-drawing.draw_5()
-
-drawing.draw_test_frame()
 drawing.window.exitonclick()
