@@ -1,33 +1,35 @@
 import fraction_class as f
 
-def nwd(a,b):       # the greatest common divisor
+
+def nwd(a, b):       # the greatest common divisor
     while b:
         a, b = b, a % b
     return a
 
-def nww(a,b):       # the least common multiple
-    return a*b//nwd(a,b)
+
+def nww(a, b):       # the least common multiple
+    return a*b//nwd(a, b)
 
 
 class Root:
-    def __init__(self, coefficient, degree = 1, number = 1):
+    def __init__(self, coefficient, degree=1, number=1):
 
         if isinstance(coefficient, int):           # coefficient can be Fraction or integer
             self.coefficient = f.Fraction(coefficient)
         elif isinstance(coefficient, f.Fraction):
             self.coefficient = coefficient
         else:
-            raise TypeError
+            raise BadCoefficientTypeException()
 
         if isinstance(degree, int):
             self.degree = degree                   # degree must be positive integer
         else:
-            raise TypeError
+            raise BadDegreeTypeException()
 
-        if isinstance(number, int):                # number must be positive integer
+        if isinstance(number, int):                # number under root must be positive integer
             self.number = number
         else:
-            raise TypeError
+            raise BadNumberTypeException()
 
         self.simplify()
 
@@ -40,25 +42,24 @@ class Root:
         if self.degree == 1 and self.number == 1 and self.coefficient.decimal() == 1:
             return "1"
         if self.degree == 1 and self.number == 1:
-            return ("{}".format(self.coefficient))
+            return "{}".format(self.coefficient)
         if self.coefficient.decimal() == 1:
-            return ("{}^(1/{})".format(int(self.number), int(self.degree)))
+            return "{}^(1/{})".format(int(self.number), int(self.degree))
         if self.coefficient.decimal() == -1:
-            return ("-{}^(1/{})".format(int(self.number), int(self.degree)))
+            return "-{}^(1/{})".format(int(self.number), int(self.degree))
         else:
-            return ("{}*({}^(1/{}))".format(self.coefficient,int(self.number),int(self.degree)))
+            return "{}*({}^(1/{}))".format(self.coefficient, int(self.number), int(self.degree))
 
-
-    def __add__(self, other):   # addition: +
+    def __add__(self, other):   # addition: self + other
         self.simplify()
         other.simplify()
 
         if self.degree == other.degree and self.number == other.number:
             return [Root(self.coefficient+other.coefficient, int(self.degree), int(self.number))]
         else:
-            return [self,other]
+            return [self, other]
 
-    def __sub__(self, other):    # substraction: -
+    def __sub__(self, other):    # substraction: self - other
         self.simplify()
         other.simplify()
 
@@ -67,7 +68,7 @@ class Root:
         else:
             return [self, Root(-other.coefficient, int(other.degree), int(other.number))]
 
-    def __mul__(self, other):   # multiplication: *
+    def __mul__(self, other):   # multiplication: self * other
         self.simplify()
         other.simplify()
 
@@ -78,7 +79,7 @@ class Root:
         r.simplify()
         return r
 
-    def __truediv__(self, other):   # real number division: /
+    def __truediv__(self, other):   # real number division: self / other # this need fix
         self.simplify()
         other.simplify()
 
@@ -94,33 +95,61 @@ class Root:
 
         return Root(coeff, int(deg), int(d))
 
+    def __pow__(self, power, modulo=None):      # exponentiation: self ** power
+        if not isinstance(power, int):
+            raise BadPowerTypeException()
+        x = Root(1)
+        for i in range(power):
+            x = x*self
+            x.simplify()
 
-    def __floordiv__(self, other):      # integers division: //
-        pass                            # operation unavailable
+        return x
 
-    def __mod__(self, other):           # modulo: %
-        pass                            # operation unavailable
-
-    def __pow__(self, power, modulo=None):      # exponentiation: **
-        if not modulo == None:                  # exponentiation with modulo unavailable
-            pass
-        else:
-            x = Root(1)
-            for i in range(power):
-                x = x*self
-                x.simplify()
-
-            return x
-
-    def __neg__(self):      # opposite number: -
+    def __neg__(self):      # opposite number: -self
         return Root(-self.coefficient, int(self.degree), int(self.number))
+
+    def __abs__(self):      # absolute value: abs(self)
+        return Root(abs(self.coefficient), int(self.degree), int(self.number))
+
+    def __invert__(self):   # inverse of the root: ~self # this need fix ater truediv
+        r = Root(1)
+        return r/self
+
+    def __int__(self):      # converting root to integer number: int(self)
+        return int(self.decimal(15))
+
+    def __float__(self):    # converting fraction to float number: float(self)
+        return self.decimal(15)
+
+    def __lt__(self, other):    # self < other
+        return self.decimal() < other.decimal()
+
+    def __le__(self, other):    # self <= other
+        return self.decimal() <= other.decimal()
+
+    def __eq__(self, other):    # self == other
+        self.simplify()
+        other.simplify()
+        return self.coefficient == other.coefficient and self.degree == other.degree and self.number == other.number
+
+    def __ge__(self, other):    # self >= other
+        return self.decimal() >= other.decimal()
+
+    def __gt__(self, other):    # self > other
+        return self.decimal() > other.decimal()
+
+    def __floor__(self):        # math.floor(self)
+        return round((self.decimal(15) - 0.5))
+
+    def __ceil__(self):         # math.ceil(self)
+        return round((self.decimal(15) + 0.5))
 
     def simplify(self):    # simplifying number
         dividers = []
         i = 2
         num = self.number
         while num != 1:
-            if num%i == 0:
+            if num % i == 0:
                 dividers.append(i)
                 num /= i
             else:
@@ -159,20 +188,41 @@ class Root:
             p = counts[0]
 
             for i in counts:
-                p = nwd(p,i)
+                p = nwd(p, i)
             if self.degree % p == 0:
                 self.degree //= p
                 self.number = pow(self.number, (1/p))
 
         self.coefficient.simplify()
 
+    def decimal(self, decimal_places=2):       # max decimal_places = 15; return approximate value of the expression
+        if not 0 <= decimal_places <= 15:
+            raise BadArgumentException()
 
-    def decimal(self, decimalplaces = 2):       # max decimalplaces = 15; return approximate value of the expression
         result = self.coefficient.decimal(15)*pow(self.number, (1/self.degree))
-        return round(result,decimalplaces)
+        return round(result, decimal_places)
 
 
+class BadCoefficientTypeException(Exception):      # exception: bad coefficient value
+    def __init__(self):
+        super().__init__("Bad argument. Coefficient must be integer or Fraction!")
 
 
+class BadDegreeTypeException(Exception):      # exception: bad degree value
+    def __init__(self):
+        super().__init__("Bad argument. Degree must be positive integer!")
 
 
+class BadNumberTypeException(Exception):      # exception: bad number under root value
+    def __init__(self):
+        super().__init__("Bad argument. Number under root must be positive integer!")
+
+
+class BadPowerTypeException(Exception):     # exception: bad power value
+    def __init__(self):
+        super().__init__("Bad argument. Power must be integer!")
+
+
+class BadArgumentException(Exception):      # exception: bad decimal places number
+    def __init__(self):
+        super().__init__("Bad argument. Decimal places number should be integer between <0,15>!")

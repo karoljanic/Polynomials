@@ -3,7 +3,7 @@ import turtle
 scale = 10
 
 def draw_test_frame(self):
-    self.pencolor("white")
+    self.pencolor("green")
     self.pendown()
     self.forward(4 * scale)
     self.left(90)
@@ -366,73 +366,56 @@ def draw_x(self, power = "-"):
     self.left(90)
 
 
-def draw_fraction(self, numerator, denominator):
+def draw_fraction(self, numerator, denominator, simplify=False):
     global scale
-    self.penup()
-    self.right(90)
-    self.forward(scale)
-    self.left(90)
-    n1 = len(numerator)
-    n2 = len(denominator)
-    n = max(n1, n2)
-    scale /= 2
-    self.forward((n-n2)*scale*2)
-    self.pendown()
-    draw_integer_number(self,denominator)
-    self.forward((n - n2) * scale * 2)
-    self.left(90)
-    self.forward(7 * scale)
-    self.forward(scale)
-    self.left(90)
-    self.pendown()
-    self.forward(n * scale * 4)
-    self.penup()
-    self.right(90)
-    self.forward(scale)
-    self.right(90)
-    self.forward((n-n1)*scale*2)
-    draw_integer_number(self,numerator)
-    self.forward((n - n1) * scale * 2)
-    self.right(90)
-    self.forward(7 * scale)
-    self.left(90)
-    scale *= 2
+    if int(numerator) < 0:
+        draw_minus(self)
+        numerator = numerator[1:]
+    if int(denominator) < 0:
+        draw_minus(self)
+        denominator = denominator[1:]
+
+    if simplify == False or denominator != "1":
+        self.penup()
+        self.right(90)
+        self.forward(scale)
+        self.left(90)
+        n1 = len(numerator)
+        n2 = len(denominator)
+        n = max(n1, n2)
+        scale /= 2
+        self.forward((n-n2)*scale*2)
+        self.pendown()
+        draw_integer_number(self,str(abs(int(denominator))))
+        self.forward((n - n2) * scale * 2)
+        self.left(90)
+        self.forward(7 * scale)
+        self.forward(scale)
+        self.left(90)
+        self.pendown()
+        self.forward(n * scale * 4)
+        self.penup()
+        self.right(90)
+        self.forward(scale)
+        self.right(90)
+        self.forward((n-n1)*scale*2)
+        draw_integer_number(self,str(abs(int(numerator))))
+        self.forward((n - n1) * scale * 2)
+        self.right(90)
+        self.forward(7 * scale)
+        self.left(90)
+        scale *= 2
+    else:
+        draw_integer_number(self,numerator)
 
 def draw_number(self, number): # from format: 'number_class.py'
     global scale
     if len(number.expressions) > 1:
-        draw_left_bracket()
+        draw_left_bracket(self)
 
     for i in range(len(number.expressions)):
         x = number.expressions[i]
-        if i == 0 and x.decimal(15) < 0 and x.coefficient.denominator != 1:
-            draw_minus(self)
-        elif i == 0 or (x.decimal(15) < 0 and x.coefficient.denominator == 1):
-            pass
-        elif x.decimal(15) < 0:
-            draw_minus(self)
-        else:
-            draw_plus(self)
-        if x.coefficient.decimal(15) == 1 and pow(x.number, (1/x.degree)) == 1:
-            draw_1(self)
-        elif x.coefficient.decimal(15) == -1 and pow(x.number, (1/x.degree)) == 1:
-            draw_minus(self)
-            draw_1(self)
-        if x.coefficient.decimal(15) == 1 and pow(x.number, (1 / x.degree)) != 1:
-            pass
-        elif x.coefficient.decimal(15) == -1 and pow(x.number, (1 / x.degree)) != 1:
-            draw_minus(self)
-        elif x.coefficient.denominator == 1:
-            draw_integer_number(self,str(int(x.coefficient.numerator)))
-        elif x.coefficient.denominator == -1:
-            draw_minus(self)
-            draw_integer_number(self,str(int(x.coefficient.numerator)))
-        else:
-            draw_fraction(self,str(abs(int(x.coefficient.numerator))), str(abs(int(x.coefficient.denominator))))
-            draw_space(self,1)
-
-        if pow(x.number, (1/x.degree)) != 1:
-            draw_root(self,str(int(x.number)), str(int(x.degree)))
+        draw_fraction(self, str(int(x.coefficient.numerator)), str(int(x.coefficient.denominator)), True)
 
     if len(number.expressions) > 1:
         draw_right_bracket(self)
@@ -469,3 +452,10 @@ def draw_number_to_poly(self, number): # from format: 'number_class.py'
     if len(number.expressions) > 1:
         draw_right_bracket()
 """
+
+def draw_poly(self, poly): # from format: 'polynomial_class.py'
+    n = len(poly.coeffs) - 1
+    for i in range(len(poly.coeffs)):
+        x = poly.coeffs[i]
+        draw_number(self, x)
+        draw_space(self, 4)

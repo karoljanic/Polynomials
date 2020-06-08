@@ -1,4 +1,5 @@
 import drawing_class as draw
+import polynomial_class as poly
 from tkinter import *
 import turtle
 import re
@@ -13,16 +14,15 @@ class Interface():
         self.first_frame()
         self.create_wigets()
 
-        self.canvas = Canvas(master=self.window, width=500, height=500)
+        self.canvas = Canvas(master=self.window, width=750, height=500)
         self.canvas.config(background="green")
         self.canvas.pack()
 
         self.alex = turtle.RawTurtle(self.canvas)
+        draw.scale = 4
+
+        self.set_start_pos()
         self.alex.pencolor("blue")
-
-        #draw.scale = 5
-        #draw.draw_integer_number(self.alex, "35")
-
 
         self.window.mainloop()
 
@@ -36,13 +36,14 @@ class Interface():
         frame1.config(background="black")
         frame2.config(background="black")
         frame3.config(background="black")
-
         frame1.pack()
         frame2.pack()
         frame3.pack()
 
         label1 = Label(frame1, text="Enter degree of polynomial:", font=("Courier", 16),
                        background="black", foreground="orange")
+
+        sep0 = Label(frame2, text="                              ", background="black", foreground="black")
 
         self.entry1 = Entry(frame2, font=("Courier", 14),
                             background="white", foreground="black", justify=CENTER, width=5)
@@ -61,6 +62,7 @@ class Interface():
         sep3 = Label(frame3, text=" ", font=("Courier", 3),
                      background="black", foreground="black")
 
+        sep0.pack(side=LEFT)
         label1.pack(side=LEFT)
         self.entry1.pack(side=LEFT)
         sep1.pack(side=LEFT)
@@ -77,8 +79,24 @@ class Interface():
         else:
             self.info.config(foreground="red")
 
+    def set_start_pos(self):
+        self.alex.penup()
+        self.alex.backward(self.canvas.winfo_width() / 2)
+        self.alex.left(90)
+        self.alex.forward(self.canvas.winfo_height() / 2)
+        self.alex.backward((draw.scale + 2) * 7)
+        self.alex.right(90)
+        self.alex.forward(2 * draw.scale)
+
     def stage_2(self):
-        pass
+        coeffs = []
+        n = int(self.entry1.get())
+        for i in range(n):
+            coeffs.append("1")
+
+        coeffs = ["1", "-1", "1/2", "2/3", "3/1", "1/1"]
+        polynomial = poly.Polynomial("Poly(x)", coeffs)
+        draw.draw_poly(self.alex, polynomial)
 
 
 

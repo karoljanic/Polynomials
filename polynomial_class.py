@@ -211,30 +211,3 @@ class Polynomial:
 
     def __divmod__(self, other):        # Poly1 % Poly2
         print("divmod")
-
-    def draw_it(self):
-        drawing = draw.Drawing()
-        drawing.scale = 8
-        n = len(self.coeffs) - 1
-        for i in range(len(self.coeffs)):
-            x = self.coeffs[i]
-            if i != 0 and x.decimal(15) > 0:
-                drawing.draw_plus()
-            if x.decimal(15) == 0:
-                n -= 1
-                continue
-            elif x.decimal(15) == 1:
-                pass
-            elif x.decimal(15) == -1:
-                drawing.draw_minus()
-            else:
-                drawing.draw_number(x)
-            if n == 0:
-                pass
-            elif n == 1:
-                drawing.draw_x()
-            else:
-                drawing.draw_x(str(n))
-            n -= 1
-
-        drawing.window.exitonclick()
