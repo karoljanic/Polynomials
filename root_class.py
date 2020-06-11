@@ -1,4 +1,5 @@
 import fraction_class as f
+import math
 
 
 def nwd(a, b):       # the greatest common divisor
@@ -74,12 +75,12 @@ class Root:
 
         coeff = self.coefficient*other.coefficient
         degree = self.degree*other.degree
-        num = self.number**other.degree * other.number**self.degree
+        num = int(self.number**other.degree) * (int(other.number)**int(self.degree))
         r = Root(coeff, int(degree), int(num))
         r.simplify()
         return r
 
-    def __truediv__(self, other):   # real number division: self / other # this need fix
+    def __truediv__(self, other):   # real number division: self / other
         self.simplify()
         other.simplify()
 
@@ -90,20 +91,34 @@ class Root:
         b = pow(other.number, deg//other.degree)
         c = b
 
-        coeff = coeff / f.Fraction(b)
+        coeff = coeff / f.Fraction(int(b))
         d = a * (c ** (deg-1))
 
         return Root(coeff, int(deg), int(d))
 
     def __pow__(self, power, modulo=None):      # exponentiation: self ** power
-        if not isinstance(power, int):
-            raise BadPowerTypeException()
-        x = Root(1)
-        for i in range(power):
-            x = x*self
-            x.simplify()
+        if isinstance(power, int):
+            result = Root(1)
+            for i in range(power):
+                result *= self
+            result.simplify()
 
-        return x
+            return result
+        elif isinstance(power, f.Fraction):
+            res = self**power.numerator
+            coeff = f.Fraction(1, res.coefficient.denominator)
+            result = Root(coeff, int(self.degree*power.denominator), int(self.number))
+            result.simplify()
+            a = Root(1, power.denominator, self.coefficient.numerator *
+                     (self.coefficient.denominator**(power.denominator-1)))
+            a.simplify()
+            result.simplify()
+            result *= a
+            result.simplify()
+
+            return result
+        else:
+            raise UnavaiableOperationException()
 
     def __neg__(self):      # opposite number: -self
         return Root(-self.coefficient, int(self.degree), int(self.number))
@@ -111,14 +126,14 @@ class Root:
     def __abs__(self):      # absolute value: abs(self)
         return Root(abs(self.coefficient), int(self.degree), int(self.number))
 
-    def __invert__(self):   # inverse of the root: ~self # this need fix ater truediv
+    def __invert__(self):   # inverse of the root: ~self
         r = Root(1)
         return r/self
 
     def __int__(self):      # converting root to integer number: int(self)
         return int(self.decimal(15))
 
-    def __float__(self):    # converting fraction to float number: float(self)
+    def __float__(self):    # converting root to float number: float(self)
         return self.decimal(15)
 
     def __lt__(self, other):    # self < other
@@ -144,14 +159,14 @@ class Root:
     def __ceil__(self):         # math.ceil(self)
         return round((self.decimal(15) + 0.5))
 
-    def simplify(self):    # simplifying number
+    def simplify(self):    # simplifying root
         dividers = []
         i = 2
         num = self.number
         while num != 1:
             if num % i == 0:
                 dividers.append(i)
-                num /= i
+                num //= i
             else:
                 i += 1
         if len(dividers) > 0:
@@ -166,7 +181,7 @@ class Root:
                     n = self.degree
                     a = counts[i] // self.degree
                     self.coefficient = self.coefficient * (unique_dividers[i]**a)
-                    self.number /= (unique_dividers[i]**(n*a))
+                    self.number //= (int(unique_dividers[i])**int(n*a))
 
         if self.number == 1:
             self.degree = 1
@@ -177,7 +192,7 @@ class Root:
         while num != 1:
             if num % i == 0:
                 dividers.append(i)
-                num /= i
+                num //= i
             else:
                 i += 1
         if len(dividers) > 0:
@@ -191,11 +206,11 @@ class Root:
                 p = nwd(p, i)
             if self.degree % p == 0:
                 self.degree //= p
-                self.number = pow(self.number, (1/p))
+                self.number = math.ceil(pow(self.number, (1/p)))
 
         self.coefficient.simplify()
 
-    def decimal(self, decimal_places=2):       # max decimal_places = 15; return approximate value of the expression
+    def decimal(self, decimal_places=2):       # max decimal_places = 15; return approximate value of the root
         if not 0 <= decimal_places <= 15:
             raise BadArgumentException()
 
@@ -226,3 +241,8 @@ class BadPowerTypeException(Exception):     # exception: bad power value
 class BadArgumentException(Exception):      # exception: bad decimal places number
     def __init__(self):
         super().__init__("Bad argument. Decimal places number should be integer between <0,15>!")
+
+
+class UnavaiableOperationException(Exception):       # exception: class can't do it
+    def __init__(self):
+        super().__init__("Sorry. We can't caltulate it. ;(. Power must be integer or fraction. ")

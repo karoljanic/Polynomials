@@ -45,11 +45,12 @@ class Fraction:
         return result
 
     def __pow__(self, power):       # exponentiation: self**power
-        if not isinstance(power, int):
+        if isinstance(power, int):
+            result = Fraction(int(self.numerator ** power), int(self.denominator ** power))
+            result.simplify()
+            return result
+        else:
             raise BadPowerTypeException()
-        result = Fraction(int(self.numerator ** power), int(self.denominator ** power))
-        result.simplify()
-        return result
 
     def __neg__(self):      # opposite fraction: -self
         result = Fraction(-int(self.numerator), int(self.denominator))
@@ -91,7 +92,7 @@ class Fraction:
     def __ceil__(self):         # math.ceil(self)
         return round((self.numerator * 1.0 / self.denominator + 0.5))
 
-    def decimal(self, decimal_places=2):       # max decimal_places = 15; return approximate value of the expression
+    def decimal(self, decimal_places=2):       # max decimal_places = 15; return approximate value of the fraction
         if not 0 <= decimal_places <= 15:
             raise BadArgumentException()
 
