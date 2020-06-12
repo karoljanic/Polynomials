@@ -150,11 +150,11 @@ class Polynomial:
 
         return result
 
-# about dividing polynimials: P(x) = Q(x)*S(x) + R(x), Q(x) is a divisor
+# about dividing polynomials: P(x) = Q(x)*S(x) + R(x), Q(x) is a divisor
 
     def __truediv__(self, other):       # self / other; it return tuple( S(x),R(x) )
         if other == Polynomial("P(x)", ["1"]):
-            return self,Polynomial("R(x)",[])
+            return self, Polynomial("R(x)", [])
         zero = Polynomial("Z(x)", [""])
         if zero == other:
             raise ZeroDivisionError()
@@ -247,10 +247,12 @@ class Polynomial:
             self.coeffs.remove(self.coeffs[0])
 
     def get_value(self, argument):      # it returns the polynomial value for a given variable
+        self.simplify()
         result = self.coeffs[0]
         n = len(self.coeffs)
         for i in range(1, n):
-            result = result * argument + self.coeffs[i]
+            result = result * argument
+            result += self.coeffs[i]
 
         return result
 
@@ -386,7 +388,6 @@ class Polynomial:
         divs = divisors(d)
         sols = []
         for x in divs:
-
             if self.get_value(number.Number(str(x))) == number.Number("0"):
                 sols.append(number.Number(str(x)))
                 if len(sols) == self.get_degree_of_polynomial():
@@ -422,54 +423,68 @@ class Polynomial:
 
         return sols
 
-    def break_down_to_factor(self, only_list_of_roots=False):     # it returns a polynomial broken down
+    def break_down_to_factor(self, only_resultat=True):          # it returns a polynomial broken down
         roots = []                                                # to the lowest possible real factors
+
+        if len(self.coeffs) == 1 and self.coeffs[0] == number.Number("0"):
+            return self.name + " = 0"
+
         poly = Polynomial("P(x)", [])
         for x in self.coeffs:
             poly.coeffs.append(x)
+        poly.simplify()
 
-        if poly.coeffs[-1].decimal(15) == 0:
-            roots.append(number.Number("0"))
-            poly1 = Polynomial("x(x)", ["1", "0"])
-            poly //= poly1
-            while poly.coeffs[-1].decimal(15) == 0:
-                poly //= poly1
-       # while poly.get_degree_of_polynomial() > 2:
         divs = poly.find_rational_roots()
-        for x in divs:
-            if x not in roots:
-                roots.append(x)
-        d_poly = Polynomial("D(x)", ["1"])
-        p = Polynomial("P(x)", ["1"])
-        ###
-        for x in divs:
-            p.coeffs = [number.Number("1"), -x]
-            d_poly *= p
-        poly = (poly / d_poly)[0]
-        ###
-        if poly.get_degree_of_polynomial() == 2:
-            d = poly.delta_metod(True)
-            for x in d:
-                if x not in roots:
-                    roots.append(x)
-        elif poly.get_degree_of_polynomial() == 1:
-            d = poly.linear_equation()
-            if d not in roots:
+        while divs:
+            for d in divs:
                 roots.append(d)
+                p = Polynomial("P(x)", ["1"])
+                p.coeffs = [number.Number("1"), -d]
+                poly //= p
+                divs = poly.find_rational_roots()
 
-        if only_list_of_roots:
-            return roots
-        result = self.name+" ="
-        if self.coeffs[0].decimal(15) != 1:
-            result += str(self.coeffs[0])
+        if poly.coeffs[0] == number.Number("-1"):
+            a = "-"
+            poly = -poly
+        elif poly.coeffs[0] != number.Number("1"):
+            a = poly.coeffs[0]
+            for i in range(len(poly.coeffs)):
+                poly.coeffs[i] /= a
+            a = str(a)
+        else:
+            a = ""
+
+        if poly.get_degree_of_polynomial() == 2:
+            roots += poly.delta_metod(True)
+
+        result = self.name+" = "+a
+
+        if poly != Polynomial("P(x)", "1"):
+            s = str(poly)
+            result += "(" + s[s.find("=")+2:] + ")"
+
+        unique_roots = []
         for x in roots:
-            if x.decimal(15) < 0:
-                result += "(x"+str(x)+")"
-            elif x.decimal(15) > 0:
-                result += "(x +"+str(x)+")"
+            if x not in unique_roots:
+                unique_roots.append(x)
+
+        for x in unique_roots:
+            if x.decimal(15) > 0:
+                result += "(x" + str(-x) + ")"
+            elif x.decimal(15) < 0:
+                result += "(x +" + str(-x) + ")"
             else:
                 result += "x"
-        return result
+
+            if roots.count(x) != 1:
+                result += "^" + str(roots.count(x))
+
+        if only_resultat:
+            return result
+        else:
+            return unique_roots, poly.get_degree_of_polynomial() < 3
+
+
 
     def __lt__(self, other):  # self < other; it solves inequality; return a list with intervals
         poly = self-other
