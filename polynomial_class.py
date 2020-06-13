@@ -69,10 +69,11 @@ class Polynomial:
             n -= 1
 
         new_result = ""
+        numbers = {"-", "0" ,"1","2", "3", "4", "5", "6", "7", "8", "9"}
         for i in range(result.find("=")+2, len(result)):
             if result[i] == "1":
                 if i+1 < len(result):
-                    if result[i+1] == variable:
+                    if result[i+1] == variable and i > 0 and result[i-1] not in numbers:
                         pass
                     else:
                         new_result += result[i]
@@ -482,16 +483,49 @@ class Polynomial:
         if only_resultat:
             return result
         else:
-            return unique_roots, poly.get_degree_of_polynomial() < 3
-
-
+            return [sorted(unique_roots), roots, poly.get_degree_of_polynomial() < 3]
 
     def __lt__(self, other):  # self < other; it solves inequality; return a list with intervals
         poly = self-other
-        print(poly)
-        d = poly.break_down_to_factor(True)
-        print(d)
-        #d = sorted(d, key=self.decimal())
+        divs = poly.break_down_to_factor(False)
+        unique_d = divs[0]
+        result = []
+        if divs[2]:
+            for i in range(len(unique_d)):
+                if i == 0:
+                    if poly.get_value(unique_d[i]+number.Number("-1")) < number.Number("0"):
+                        result.append("(-Inf,"+str(unique_d[i])+")")
+                if i == len(unique_d)-1:
+                    if poly.get_value(unique_d[i]+number.Number("1")) < number.Number("0"):
+                        result.append("("+str(unique_d[i])+", Inf)")
+                    continue
+                if poly.get_value((unique_d[i]+unique_d[i+1])/number.Number("2")) < number.Number("0"):
+                    result.append("("+str(unique_d[i])+", "+str(unique_d[i+1])+")")
+
+            return result, False
+        else:
+            raise InvalidRoots()
+
+    def __le__(self, other):  # self <= other; it solves inequality; return a list with intervals
+        poly = self - other
+        divs = poly.break_down_to_factor(False)
+        unique_d = divs[0]
+        result = []
+        if divs[2]:
+            for i in range(len(unique_d)):
+                if i == 0:
+                    if poly.get_value(unique_d[i] + number.Number("-1")) <= number.Number("0"):
+                        result.append("(-Inf," + str(unique_d[i]) + ")")
+                if i == len(unique_d) - 1:
+                    if poly.get_value(unique_d[i] + number.Number("1")) <= number.Number("0"):
+                        result.append("(" + str(unique_d[i]) + ", Inf)")
+                    continue
+                if poly.get_value((unique_d[i] + unique_d[i + 1]) / number.Number("2")) <= number.Number("0"):
+                    result.append("(" + str(unique_d[i]) + ", " + str(unique_d[i + 1]) + ")")
+
+            return result, True
+        else:
+            raise InvalidRoots()
 
 
 class InvalidPolynomialDegree(Exception):      # exception: invalid polynomial degree
@@ -507,3 +541,8 @@ class InvalidPolynomialDegree(Exception):      # exception: invalid polynomial d
 class InvalidCoefficientNumber(Exception):       # exception: invalid coefficient number
     def __init__(self):
         super().__init__("Invalid coefficient number. Coefficients must be integer!")
+
+
+class InvalidRoots(Exception):      # exception: invalid polynomial's roots
+    def __init__(self):
+        super().__init__("Invalid roots of polynomial. All roots must be rational numbers!")

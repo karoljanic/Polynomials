@@ -30,13 +30,16 @@ print(h)
 test2 = poly.Polynomial("T2(x)", ["1", "9", "-21", "-245", "0"])
 test = poly.Polynomial("T(x)",["7", "-49","-56","602", "511", "-973", "-1974", "-9660", "-12600", "0"])
 test3 = poly.Polynomial("T3(x)", ["1", "-3", "-9", "-9"])
-print(test)
-#print(test.find_rational_roots())
-print(test.break_down_to_factor(False))
-
+n = number.Number("21")
+p = poly.Polynomial("P(x)", ["21", "1"])
+print(test2)
+print(test2.break_down_to_factor())
+print(test2 <= poly.Polynomial("P(x)", "0"))
+print(test2 < poly.Polynomial("P(x)", "0"))
+print(test2 >= poly.Polynomial("P(x)", "0"))
+print(test2 > poly.Polynomial("P(x)", "0"))
 print("")
-print(test3)
-print(test3.break_down_to_factor(False))
+
 """
 import drawing_class as d
 import number_class as number
