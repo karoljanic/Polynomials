@@ -12,7 +12,7 @@ class Number:
     # 0       ""                            ---                         it is zero
     # 1       "x",                x must belong to integers;            it is a integer
     # 2.0     "a/b",              a,b must belong to integers;          a/b is a fraction
-    # 2.1     "c(a/b)"            k,a,b must belong to integers;        mixed number: it is a fraction (c*b+a)/b
+    # 2.1     "c(a/b)"            c,a,b must belong to integers;        mixed number: it is a fraction (c*b+a)/b
     # 3.0     "x^n",              x,n must belong to integers;          x to the power of n
     # 3.1     "(a/b)^n"           a,b,n must belong to integers;        a/b to the power of n
     # 4.0     "a*x^n",            a,x,n must belong to integers;        a times x to the power of n

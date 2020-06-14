@@ -69,7 +69,7 @@ class Polynomial:
             n -= 1
 
         new_result = ""
-        numbers = {"-", "0" ,"1","2", "3", "4", "5", "6", "7", "8", "9"}
+        numbers = {"-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
         for i in range(result.find("=")+2, len(result)):
             if result[i] == "1":
                 if i+1 < len(result):
@@ -425,7 +425,7 @@ class Polynomial:
         return sols
 
     def break_down_to_factor(self, only_resultat=True):          # it returns a polynomial broken down
-        roots = []                                                # to the lowest possible real factors
+        roots = []                                               # to the lowest possible real factors
 
         if len(self.coeffs) == 1 and self.coeffs[0] == number.Number("0"):
             return self.name + " = 0"
@@ -434,6 +434,20 @@ class Polynomial:
         for x in self.coeffs:
             poly.coeffs.append(x)
         poly.simplify()
+
+        for x in poly.coeffs:
+            if len(x.expressions) == 1 and x.expressions[0].number ** x.expressions[0].degree == 1:
+                pass
+            else:
+                raise InvalidCoefficientNumber
+
+        nww_d = poly.coeffs[0].expressions[0].coefficient.denominator
+        for x in poly.coeffs:
+            nww_d = nww(nww_d, x.expressions[0].coefficient.denominator)
+
+        nww_d = number.Number(str(nww_d))
+        for i in range(len(poly.coeffs)):
+            poly.coeffs[i] *= nww_d
 
         divs = poly.find_rational_roots()
         while divs:
@@ -445,30 +459,38 @@ class Polynomial:
                 divs = poly.find_rational_roots()
 
         if poly.coeffs[0] == number.Number("-1"):
-            a = "-"
+            a = number.Number("-1") / nww_d
             poly = -poly
         elif poly.coeffs[0] != number.Number("1"):
             a = poly.coeffs[0]
+            for k in poly.coeffs:
+                a = nwd(int(a), int(k))
+            a = number.Number(str(a))
             for i in range(len(poly.coeffs)):
                 poly.coeffs[i] /= a
-            a = str(a)
         else:
-            a = ""
+            a = number.Number("1")/nww_d
 
         if poly.get_degree_of_polynomial() == 2:
             roots += poly.delta_metod(True)
 
-        result = self.name+" = "+a
+        if a == number.Number("1"):
+            a = ""
+        elif a == number.Number("-1"):
+            a = "-"
+        else:
+            a = str(a)
 
-        if poly != Polynomial("P(x)", "1"):
-            s = str(poly)
-            result += "(" + s[s.find("=")+2:] + ")"
+        result = self.name+" = "+a
 
         unique_roots = []
         for x in roots:
             if x not in unique_roots:
                 unique_roots.append(x)
-
+        if number.Number("0") in roots:
+            unique_roots.remove(number.Number("0"))
+            unique_roots.insert(0, number.Number("0"))
+        unique_roots = sorted(unique_roots, reverse=True)
         for x in unique_roots:
             if x.decimal(15) > 0:
                 result += "(x" + str(-x) + ")"
@@ -479,6 +501,10 @@ class Polynomial:
 
             if roots.count(x) != 1:
                 result += "^" + str(roots.count(x))
+
+        if poly != Polynomial("P(x)", "1"):
+            s = str(poly)
+            result += "(" + s[s.find("=")+2:] + ")"
 
         if only_resultat:
             return result
@@ -515,13 +541,93 @@ class Polynomial:
             for i in range(len(unique_d)):
                 if i == 0:
                     if poly.get_value(unique_d[i] + number.Number("-1")) <= number.Number("0"):
-                        result.append("(-Inf," + str(unique_d[i]) + ")")
+                        result.append(["-Inf", str(unique_d[i])])
+                    else:
+                        result.append([str(unique_d[i]), str(unique_d[i])])
                 if i == len(unique_d) - 1:
                     if poly.get_value(unique_d[i] + number.Number("1")) <= number.Number("0"):
-                        result.append("(" + str(unique_d[i]) + ", Inf)")
+                        result.append([str(unique_d[i]), "Inf"])
+                    else:
+                        result.append([str(unique_d[i]), str(unique_d[i])])
                     continue
                 if poly.get_value((unique_d[i] + unique_d[i + 1]) / number.Number("2")) <= number.Number("0"):
-                    result.append("(" + str(unique_d[i]) + ", " + str(unique_d[i + 1]) + ")")
+                    result.append([str(unique_d[i]), str(unique_d[i+1])])
+                else:
+                    result.append([str(unique_d[i]), str(unique_d[i])])
+
+            for i in range(len(result)-1):
+                if result[i][1] == result[i+1][0]:
+                    result[i][1] = result[i+1][1]
+                    result[i][0] = "x"
+
+            for x in result:
+                if x[0] == "x":
+                    result.remove(x)
+
+            for x in result:
+                if x[0] == x[1]:
+                    x.remove(x[0])
+
+            return result, True
+        else:
+            raise InvalidRoots()
+
+    def __gt__(self, other):  # self > other; it solves inequality; return a list with intervals
+        poly = self-other
+        divs = poly.break_down_to_factor(False)
+        unique_d = divs[0]
+        result = []
+        if divs[2]:
+            for i in range(len(unique_d)):
+                if i == 0:
+                    if poly.get_value(unique_d[i]+number.Number("-1")) > number.Number("0"):
+                        result.append("(-Inf,"+str(unique_d[i])+")")
+                if i == len(unique_d)-1:
+                    if poly.get_value(unique_d[i]+number.Number("1")) > number.Number("0"):
+                        result.append("("+str(unique_d[i])+", Inf)")
+                    continue
+                if poly.get_value((unique_d[i]+unique_d[i+1])/number.Number("2")) > number.Number("0"):
+                    result.append("("+str(unique_d[i])+", "+str(unique_d[i+1])+")")
+
+            return result, False
+        else:
+            raise InvalidRoots()
+
+    def __ge__(self, other):  # self >= other; it solves inequality; return a list with intervals
+        poly = self - other
+        divs = poly.break_down_to_factor(False)
+        unique_d = divs[0]
+        result = []
+        if divs[2]:
+            for i in range(len(unique_d)):
+                if i == 0:
+                    if poly.get_value(unique_d[i] + number.Number("-1")) >= number.Number("0"):
+                        result.append(["-Inf", str(unique_d[i])])
+                    else:
+                        result.append([str(unique_d[i]), str(unique_d[i])])
+                if i == len(unique_d) - 1:
+                    if poly.get_value(unique_d[i] + number.Number("1")) >= number.Number("0"):
+                        result.append([str(unique_d[i]), "Inf"])
+                    else:
+                        result.append([str(unique_d[i]), str(unique_d[i])])
+                    continue
+                if poly.get_value((unique_d[i] + unique_d[i + 1]) / number.Number("2")) >= number.Number("0"):
+                    result.append([str(unique_d[i]), str(unique_d[i+1])])
+                else:
+                    result.append([str(unique_d[i]), str(unique_d[i])])
+
+            for i in range(len(result)-1):
+                if result[i][1] == result[i+1][0]:
+                    result[i][1] = result[i+1][1]
+                    result[i+1][0] = "x"
+
+            for x in result:
+                if x[0] == "x":
+                    result.remove(x)
+
+            for x in result:
+                if x[0] == x[1]:
+                    x.remove(x[0])
 
             return result, True
         else:

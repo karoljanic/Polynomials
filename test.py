@@ -27,18 +27,17 @@ print(f)
 print(g)
 print(h)
 """
-test2 = poly.Polynomial("T2(x)", ["1", "9", "-21", "-245", "0"])
+
+test2 = poly.Polynomial("T2(x)", ["2","-9","",""])
 test = poly.Polynomial("T(x)",["7", "-49","-56","602", "511", "-973", "-1974", "-9660", "-12600", "0"])
-test3 = poly.Polynomial("T3(x)", ["1", "-3", "-9", "-9"])
+test3 = poly.Polynomial("T3(x)", ["", "-12", "5"])
 n = number.Number("21")
 p = poly.Polynomial("P(x)", ["21", "1"])
 print(test2)
-print(test2.break_down_to_factor())
-print(test2 <= poly.Polynomial("P(x)", "0"))
-print(test2 < poly.Polynomial("P(x)", "0"))
-print(test2 >= poly.Polynomial("P(x)", "0"))
-print(test2 > poly.Polynomial("P(x)", "0"))
-print("")
+print(test3)
+print(test2 <= test3)
+#print(test2 >= poly.Polynomial("P(x)", [""]))
+
 
 """
 import drawing_class as d
