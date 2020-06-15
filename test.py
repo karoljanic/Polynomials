@@ -28,15 +28,16 @@ print(g)
 print(h)
 """
 
-test2 = poly.Polynomial("T2(x)", ["2","-9","",""])
+test2 = poly.Polynomial("T2(x)", ["1","10","25","0", "0"])
 test = poly.Polynomial("T(x)",["7", "-49","-56","602", "511", "-973", "-1974", "-9660", "-12600", "0"])
-test3 = poly.Polynomial("T3(x)", ["", "-12", "5"])
+test3 = poly.Polynomial("T3(x)", ["-3", "5", "0"])
 n = number.Number("21")
-p = poly.Polynomial("P(x)", ["21", "1"])
+p = poly.Polynomial("P(x)", ["11", "-3"])
+#print(test2)
+#print(test3)
+#print(test2 <= test3)
 print(test2)
-print(test3)
-print(test2 <= test3)
-#print(test2 >= poly.Polynomial("P(x)", [""]))
+print(test2 > poly.Polynomial("P(x)", [""]))
 
 
 """

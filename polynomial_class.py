@@ -555,18 +555,17 @@ class Polynomial:
                 else:
                     result.append([str(unique_d[i]), str(unique_d[i])])
 
-            for i in range(len(result)-1):
-                if result[i][1] == result[i+1][0]:
-                    result[i][1] = result[i+1][1]
-                    result[i][0] = "x"
+            n = len(result)
+            for k in range(n):
+                for i in range(len(result)-1):
+                    if result[i][1] == result[i+1][0]:
+                        result[i][1] = result[i+1][1]
+                        del result[i+1]
+                        break
 
-            for x in result:
-                if x[0] == "x":
-                    result.remove(x)
-
-            for x in result:
-                if x[0] == x[1]:
-                    x.remove(x[0])
+            for i in range(len(result)):
+                if result[i][0] == result[i][1]:
+                    del result[i][0]
 
             return result, True
         else:
@@ -616,18 +615,17 @@ class Polynomial:
                 else:
                     result.append([str(unique_d[i]), str(unique_d[i])])
 
-            for i in range(len(result)-1):
-                if result[i][1] == result[i+1][0]:
-                    result[i][1] = result[i+1][1]
-                    result[i+1][0] = "x"
+            n = len(result)
+            for k in range(n):
+                for i in range(len(result) - 1):
+                    if result[i][1] == result[i + 1][0]:
+                        result[i][1] = result[i + 1][1]
+                        del result[i + 1]
+                        break
 
-            for x in result:
-                if x[0] == "x":
-                    result.remove(x)
-
-            for x in result:
-                if x[0] == x[1]:
-                    x.remove(x[0])
+            for i in range(len(result)):
+                if result[i][0] == result[i][1]:
+                    del result[i][0]
 
             return result, True
         else:
