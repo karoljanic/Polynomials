@@ -2,6 +2,8 @@ import fraction_class as fraction
 import root_class as root
 import number_class as number
 import polynomial_class as poly
+import drawing_class as draw
+import interface
 import math
 
 a = poly.Polynomial("P(x)", ["5/2", "-7", "0", "11"])
@@ -28,17 +30,7 @@ print(g)
 print(h)
 """
 
-test2 = poly.Polynomial("T2(x)", ["1","10","25","0", "0"])
-test = poly.Polynomial("T(x)",["7", "-49","-56","602", "511", "-973", "-1974", "-9660", "-12600", "0"])
-test3 = poly.Polynomial("T3(x)", ["-3", "5", "0"])
-n = number.Number("21")
-p = poly.Polynomial("P(x)", ["11", "-3"])
-#print(test2)
-#print(test3)
-#print(test2 <= test3)
-print(test2)
-print(test2 > poly.Polynomial("P(x)", [""]))
-
+interface.Interface()
 
 """
 import drawing_class as d
